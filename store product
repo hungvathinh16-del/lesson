@@ -1,0 +1,237 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+
+namespace homeWork
+{
+    class Program
+    {
+        /// tao list
+        public static List<Product> Products = new List<Product>
+        {
+            new Product(909, "Samsung Fridge", 90000000),
+            new Product(099, "Panasonic AC", 20000000),
+            new Product(9999, "Concord", 0),
+        };
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine(@"User Menu
+                                1: Add Monitor
+                                2: Add Audio Device
+                                3: Show all products
+                                4: Search by product name
+                                5: Apply Discount
+                                0: Exit");
+
+            int choice;
+            //StoreManager kkw = new StoreManager();
+            //kkw.ShowAllProduct();
+
+            do
+            {
+                Console.Write("Enter your choice: ");
+                while (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.Write("Invalid input. Enter a number: ");
+                }
+
+                int id = 0;
+                string name = "";
+                double price = 0;
+                if (choice == 1 || choice == 2)
+                {
+                    Console.Write("Enter ID: ");
+                    id = int.Parse(Console.ReadLine());
+                    Console.Write("Enter Name: ");
+                    name = Console.ReadLine();
+                    Console.Write("Enter Price: ");
+                    price = double.Parse(Console.ReadLine());
+                }
+
+                switch (choice)
+                {
+                    case 1:
+                        Console.Write("Enter Panel: ");
+                        string panel = Console.ReadLine();
+                        Console.Write("Enter Size: ");
+                        int size = int.Parse(Console.ReadLine());
+
+                        Product product = new Monitor(id, name, price, panel, size);
+
+                        Products.Add(product);
+                        product.DisplayInfo();
+                        break;
+
+                    case 2:
+                        Console.Write("Enter output power: ");
+                        int op = int.Parse(Console.ReadLine());
+                        Console.Write("Has bluetooth ?  ");
+                        bool blue = bool.Parse(Console.ReadLine());
+
+                        Product mp3 = new AudioDevice(id, name, price, op, blue);
+                        mp3.DisplayInfo();
+                        Products.Add(mp3);
+
+                        break;
+
+                    case 3:
+                        StoreManager Mana = new StoreManager();
+                        Mana.ShowAllProduct();
+                        break;
+                    case 4:
+                        Console.Write("Enter Name : ");
+                        string sn = Console.ReadLine();
+                        StoreManager Search = new StoreManager();
+                        Search.SearchProductName(sn);
+                        break;
+
+                    case 5:
+                        Console.Write("Enter ID : ");
+                        int i = int.Parse(Console.ReadLine());
+                        StoreManager pro = new StoreManager();
+                        pro.SearchProductID(i);
+                        if (pro.SearchProductID(i))
+                        {
+                            Console.WriteLine(@"1 : % discount
+                                        2 : Number discount ");
+                            int m = int.Parse(Console.ReadLine());
+                            if (m == 1)
+                            {
+                                Console.Write("Enter % : ");
+                                double percent = double.Parse(Console.ReadLine());
+                                Product search = Products.Find(p => p.ID == i);
+                                Console.WriteLine("Price : " + search.ApplyDiscount1(percent));
+                            }
+                            else if (m == 2)
+                            {
+                                Console.Write("Enter number : ");
+                                double num = double.Parse(Console.ReadLine());
+                                Product search = Products.Find(p => p.ID == i);
+                                Console.WriteLine("Price : " + search.ApplyDiscount2(num));
+                            }
+
+                        }
+                        break;
+
+                    case 0:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            while (choice != 0);
+            Console.ReadLine();
+            
+            
+        }
+
+        public class Product
+        {
+            public int ID;
+            public string Name;
+            public double Price;
+
+            public Product() { }
+
+            public Product(int ID, string Name, double Price)
+            {
+                this.ID = ID;
+                this.Name = Name;
+                this.Price = Price;
+            }
+
+            public double ApplyDiscount1(double x)
+            {
+                return Price * x / 100;
+            }
+
+            public double ApplyDiscount2(double y)
+            {
+                return Price - y;
+            }
+
+            public virtual void DisplayInfo()
+            {
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}");
+            }
+        }
+
+        public class Monitor : Product
+        {
+            public string PanelType;
+            public int Size;
+
+            public Monitor(int ID, string Name, double Price, string PanelType, int Size) : base(ID,Name, Price)
+            {
+                this.PanelType = PanelType;
+                this.Size = Size;
+            }
+
+            public override void DisplayInfo()
+            {
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}\n Paneltype : {PanelType}\n Size : {Size}");
+            }
+        }
+        
+        public class AudioDevice : Product
+        {
+            public int OutputPower;
+            public bool HasBlueTooth = false;
+
+            public AudioDevice (int ID, string Name, double Price, int OutputPower, bool HasBlueTooth) : base(ID, Name, Price)
+            {
+                this.OutputPower = OutputPower;
+                this.HasBlueTooth = HasBlueTooth;
+            }
+            public override void DisplayInfo()
+            {
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}\n OutputPower : {OutputPower}\n HasBlueTooth : {HasBlueTooth}");
+            }
+        }
+
+        public class StoreManager
+        {
+            public void AddProduct() 
+            {
+                Products.Add(new Product());
+            }
+
+            public void ShowAllProduct()
+            {
+                foreach (Product p in Products)
+                {
+                    p.DisplayInfo();
+                }
+            }
+
+            public bool SearchProductID (int ID)
+            {
+                Product search = Products.Find(p => p.ID == ID);
+                if (search == null)
+                {
+                    Console.WriteLine(ID + " not found ");
+                    return false;
+                }
+                else
+                {
+                    search.DisplayInfo();
+                    return true;
+                }
+            }
+
+            public void SearchProductName (string n)
+            {
+                List<Product> search = Products.FindAll(p => p.Name == n);
+                foreach (Product p in search)
+                {
+                    p.DisplayInfo();
+                }
+            }
+        }
+    }
+}
