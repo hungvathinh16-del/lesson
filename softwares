@@ -1,0 +1,219 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+
+namespace homeWork
+{
+    class Program
+    {
+        private static List<Software> Softwares = new List<Software>
+        { new Tool("IOS", "Steve Jobss", 1000000, "Mobile", 8),
+          new Des ("PS", "Adobe", 999999, "CC2024", true ) };
+        static void Main(string[] args)
+        {
+            Manager mana = new Manager();
+
+            int choice;
+
+            do
+            {
+                Console.WriteLine(@"
+1. Add Design Software
+2. Add Tool Software
+3. Show All
+4. Search by Name
+5. Filter by VRAM
+6. Calculate Cost
+0. Exit
+");
+                Console.Write("Choose: ");
+                int.TryParse(Console.ReadLine(), out choice);
+
+                switch(choice)
+                {
+                    case 1:
+                        Console.Write("Name: ");
+                        string name = Console.ReadLine();
+
+                        Console.Write("Developer: ");
+                        string dev = Console.ReadLine();
+
+                        Console.Write("Monthly fee: ");
+                        double fee = double.Parse(Console.ReadLine());
+
+                        Console.Write("Version: ");
+                        string version = Console.ReadLine();
+
+                        Console.Write("Cloud support (true/false): ");
+                        bool cloud = bool.Parse(Console.ReadLine());
+
+                        mana.AddSW(
+                            new Des(name, dev, fee, version, cloud));
+                        break;
+
+                    case 2:
+                        Console.Write("Name: ");
+                        name = Console.ReadLine();
+
+                        Console.Write("Developer: ");
+                        dev = Console.ReadLine();
+
+                        Console.Write("Monthly fee: ");
+                        fee = double.Parse(Console.ReadLine());
+
+                        Console.Write("Model type: ");
+                        string model = Console.ReadLine();
+
+                        Console.Write("Min VRAM (GB): ");
+                        int vram = int.Parse(Console.ReadLine());
+
+                        mana.AddSW(
+                            new Tool(name, dev, fee, model, vram));
+                        break;
+
+                    case 3:
+                        mana.ShowAll();
+                        break;
+
+                    case 4:
+                        Console.Write("Keyword: ");
+                        string key = Console.ReadLine();
+                        mana.SearchName(key);
+                        break;
+
+                    case 5:
+                        Console.Write("Your VRAM: ");
+                        int userVRAM = int.Parse(Console.ReadLine());
+                        mana.FilterRam(userVRAM);
+                        break;
+
+                    case 6:
+                        Console.Write("Months: ");
+                        int months = int.Parse(Console.ReadLine());
+
+                        Console.Write("Discount %: ");
+                        double discount = double.Parse(Console.ReadLine());
+
+                        double total = 0;
+
+                        foreach (Software s in Softwares)
+                        {
+                            total += s.CalculateCost(months, discount);
+                            Console.WriteLine($"{s.Name} : {s.CalculateCost(months, discount):0,000}");
+                        }
+                        Console.WriteLine($"Total : {total:0,000}");
+                        break;
+                }
+            
+            } while (choice != 0);
+        }
+        public abstract class Software
+        {
+            public string Name { get; set; }
+            public string Developer { get; set; }
+
+            public double MonthlyFee { get; set; }
+
+            public Software() { }
+
+            public Software(string name, string developer, double Fee)
+            {
+                Name = name;
+                Developer = developer;
+                MonthlyFee = Fee;
+            }
+
+            public double CalculateCost(double months)
+            {
+                return MonthlyFee * months;
+            }
+            public double CalculateCost(double months, double discount = 0)
+            {
+                double total = MonthlyFee * months;
+                return total - (total * discount / 100);
+            }
+            public virtual void DisplayInfo() { }
+        }
+
+        public class Des : Software
+        {
+            public string Ver { get; set; }
+            public bool Cloud { get; set; }
+
+            public Des(string name, string developer, double Fee, string ver, bool cloud) : base(name, developer, Fee)
+            {
+                Ver = ver;
+                Cloud = cloud;
+            }
+
+            public override void DisplayInfo()
+            {
+                Console.WriteLine($"[Design] {Name} - {Developer}");
+                Console.WriteLine($"Fee: {MonthlyFee} VND");
+                Console.WriteLine($"Version: {Ver}");
+                Console.WriteLine($"Cloud: {Cloud}");
+                Console.WriteLine("-------------------------");
+            }
+        }
+
+        public class Tool : Software
+        {
+            public string Model { get; set; }
+            public int VRam { get; set; }
+
+            public Tool(string name, string developer, double Fee, string model, int ram) : base(name, developer, Fee)
+            {
+                Model = model;
+                VRam = ram;
+            }
+            public override void DisplayInfo()
+            {
+                Console.WriteLine($"[Tool] {Name} - {Developer}");
+                Console.WriteLine($"Fee: {MonthlyFee} VND");
+                Console.WriteLine($"Model: {Model}");
+                Console.WriteLine($"Min VRAM: {VRam} GB");
+                Console.WriteLine("-------------------------");
+            }
+
+        }
+
+        public class Manager
+        {
+           
+            public void AddSW(Software s)
+            { Softwares.Add(s); }
+
+            public void ShowAll()
+            {
+                foreach (Software s in Softwares)
+                {
+                    s.DisplayInfo();
+                }
+            }
+
+            public void SearchName(string n)
+            {
+                foreach (Software s in Softwares)
+                {
+                    if (s.Name == n)
+                    {
+                        s.DisplayInfo();
+                    }
+                }
+            }
+
+            public void FilterRam(int r)
+            {
+                foreach (Software s in Softwares)
+                {
+                    if (s is Tool tool && tool.VRam <= r) tool.DisplayInfo();
+                }
+            }
+        }
+    }
+}
