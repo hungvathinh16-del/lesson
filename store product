@@ -37,12 +37,14 @@ namespace homeWork
                 Console.Write("Enter your choice: ");
                 while (!int.TryParse(Console.ReadLine(), out choice))
                 {
-                    Console.Write("Invalid input. Enter a number: ");
+                    Console.Write("Invalid input. Enter a choice: ");
                 }
+                Console.WriteLine('\n');
 
                 int id = 0;
                 string name = "";
                 double price = 0;
+
                 if (choice == 1 || choice == 2)
                 {
                     Console.Write("Enter ID: ");
@@ -74,15 +76,16 @@ namespace homeWork
                         bool blue = bool.Parse(Console.ReadLine());
 
                         Product mp3 = new AudioDevice(id, name, price, op, blue);
-                        mp3.DisplayInfo();
-                        Products.Add(mp3);
 
+                        Products.Add(mp3);
+                        mp3.DisplayInfo();
                         break;
 
                     case 3:
                         StoreManager Mana = new StoreManager();
                         Mana.ShowAllProduct();
                         break;
+
                     case 4:
                         Console.Write("Enter Name : ");
                         string sn = Console.ReadLine();
@@ -92,35 +95,53 @@ namespace homeWork
 
                     case 5:
                         Console.Write("Enter ID : ");
-                        int i = int.Parse(Console.ReadLine());
+                        int i = 0;
+                        while (!int.TryParse(Console.ReadLine(), out i))
+                        {
+                            Console.Write("Invalid input. Enter a new ID : ");
+                        }
                         StoreManager pro = new StoreManager();
-                        pro.SearchProductID(i);
+                        ///
                         if (pro.SearchProductID(i))
                         {
-                            Console.WriteLine(@"1 : % discount
-                                        2 : Number discount ");
-                            int m = int.Parse(Console.ReadLine());
+                            Console.WriteLine("1 : % discount \n2 : Number discount ");                            
+                            Console.Write("Enter your choice: ");
+                            int m;
+                            while (!int.TryParse(Console.ReadLine(), out m))
+                            {
+                                Console.Write("Invalid input. Enter a 1 or 2 : ");
+                            }
                             if (m == 1)
                             {
                                 Console.Write("Enter % : ");
-                                double percent = double.Parse(Console.ReadLine());
+                                double percent;
+                                while (!double.TryParse(Console.ReadLine(), out percent))
+                                {
+                                    Console.Write("Invalid input. Enter a new %: ");
+                                }
+                                if (percent > 100) percent = 100;
                                 Product search = Products.Find(p => p.ID == i);
-                                Console.WriteLine("Price : " + search.ApplyDiscount1(percent));
+                                Console.WriteLine($"Price after discounted :  {search.ApplyDiscount1(percent):0,000}");
+                                break;
                             }
                             else if (m == 2)
                             {
                                 Console.Write("Enter number : ");
-                                double num = double.Parse(Console.ReadLine());
+                                double num;
                                 Product search = Products.Find(p => p.ID == i);
-                                Console.WriteLine("Price : " + search.ApplyDiscount2(num));
+                                while (!double.TryParse(Console.ReadLine(), out num))
+                                {
+                                    if (num > search.Price)
+                                    Console.Write("Invalid input or discount > price .\n Enter a new number: ");
+                                }
+                                
+                                Console.WriteLine($"Price after discounted:  { search.ApplyDiscount2(num):0,000}");
+                                break;
                             }
-
                         }
                         break;
 
                     case 0:
-                        break;
-                    default:
                         break;
                 }
             }
@@ -147,7 +168,7 @@ namespace homeWork
 
             public double ApplyDiscount1(double x)
             {
-                return Price * x / 100;
+                return Price - (Price * x / 100);
             }
 
             public double ApplyDiscount2(double y)
@@ -157,7 +178,7 @@ namespace homeWork
 
             public virtual void DisplayInfo()
             {
-                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}");
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price:0,000}\n");
             }
         }
 
@@ -174,7 +195,7 @@ namespace homeWork
 
             public override void DisplayInfo()
             {
-                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}\n Paneltype : {PanelType}\n Size : {Size}");
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price:0,000}\n Paneltype : {PanelType}\n Size : {Size}\n\n");
             }
         }
         
@@ -190,7 +211,7 @@ namespace homeWork
             }
             public override void DisplayInfo()
             {
-                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price}\n OutputPower : {OutputPower}\n HasBlueTooth : {HasBlueTooth}");
+                Console.WriteLine($"---ID : {ID}\n Name : {Name}\n Price : {Price:0,000}\n OutputPower : {OutputPower}\n HasBlueTooth : {HasBlueTooth}\n\n");
             }
         }
 
@@ -214,7 +235,7 @@ namespace homeWork
                 Product search = Products.Find(p => p.ID == ID);
                 if (search == null)
                 {
-                    Console.WriteLine(ID + " not found ");
+                    Console.WriteLine(ID + " not found, start over.\n");
                     return false;
                 }
                 else
